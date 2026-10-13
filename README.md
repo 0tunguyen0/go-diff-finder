@@ -1,82 +1,125 @@
-# Diff Finder
+# Diff Finder 🔍
 
-A Windows desktop app (Go + Fyne) that compares **files** and **folders** and shows
-differences in an easy-to-read visual format. Drag & drop is supported everywhere:
-drop 1–2 files or folders anywhere on the window.
+**Diff Finder** is a native Windows desktop application built with **Go** and the **Fyne UI toolkit**. It compares files and folders, presenting differences in a clear, easy-to-read visual format.
 
-## Features
+With window-wide drag-and-drop support, side-by-side text comparison, and recursive directory analysis, Diff Finder makes it easy to identify, navigate, and report changes.
 
-### General
-- Window opens centered; maximized state is remembered across restarts
+## ✨ Features
 
-### File Compare
-- Side-by-side and unified views with red/green highlighting
-- Summary counts (added / removed / unchanged)
-- ▲ Prev / ▼ Next buttons jump between changed lines (wraps around)
-- Full-text panel is collapsed by default; click a row to expand, click again to collapse
-- Options: ignore whitespace, ignore case, skip blank lines
-- Binary-file detection (shows sizes instead of garbage)
-- Click any row to see the full line; Copy diff / Export (.txt)
+### 📄 File Comparison
 
-### Folder Compare
-- Recursive comparison with SHA-256 content check
-- Statuses: `Same`, `Different`, `Left only`, `Right only` (+ errors)
-- Filter by name, “Only differences” toggle, ignore-case matching
-- Select a `Different` file → “Open selected in File Compare”
-- Export CSV report
+- **Multiple Views:** Switch between side-by-side and unified diff views with clear red/green highlighting and summary statistics for added, removed, and unchanged lines.
+- **Quick Navigation:** Jump between changes using the **Previous** and **Next** buttons, or select a row to inspect its full text.
+- **Flexible Options:** Ignore whitespace, ignore case, skip blank lines, and automatically detect binary files.
+- **Export and Copy:** Copy diff results to the clipboard or export comparison reports as `.txt` files.
 
-## Requirements (build only)
+### 📁 Folder Comparison
 
-- Go 1.22+
-- A C compiler for Fyne (CGO), e.g. WinLibs GCC:
-  `winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT`
+- **Recursive Analysis:** Compare directory trees recursively using SHA-256 content hashing to identify matching and differing files.
+- **Clear Status Indicators:** Quickly identify matching files, modified files, and files found only in the left or right directory.
+- **Advanced Filtering:** Filter results by filename, show only differences, and open differing files directly in the file comparison view.
+- **CSV Reports:** Export folder comparison results as CSV files for further analysis.
 
-## Run / build
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Go 1.22 or later](https://go.dev/dl/)
+- A C compiler compatible with Fyne's CGO requirements, such as [WinLibs GCC](https://winlibs.com/).
+
+Install WinLibs using Windows Package Manager:
+
+```powershell
+winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT
+```
+
+### Run the Application
+
+Run the application directly from the project directory:
 
 ```bat
 go run .
+```
+
+### Build the Release Executable
+
+Run the included build script:
+
+```bat
 build.bat
 ```
 
-Always build with `build.bat` (or the equivalent `go build` line below). A bare
-`go build` / `go build ./...` does **not** produce the release exe: the former
-names it after the folder and keeps the console window, the latter writes no
-binary at all.
+The script generates `DiffFinder.exe` in the project directory.
+
+Alternatively, build the Windows release executable manually:
 
 ```bat
-go build -trimpath -ldflags "-H windowsgui -s -w" -o DiffFinder.exe .
+go build -trimpath -ldflags="-H windowsgui -s -w" -o DiffFinder.exe .
 ```
 
-`-H windowsgui` removes the console window, `-s -w` strips debug info to keep
-the exe small. `build.bat` produces `DiffFinder.exe` in the project folder. The exe icon comes
-from `icon.png` (embedded in the window via `go:embed`, and baked into the
-exe via `icon.ico` + `app_windows_amd64.syso` — regenerate with `rsrc`
-after changing the icon).
+**Why use these build flags?**
 
-Optional command line:
+- `-trimpath` removes local filesystem paths from the compiled binary.
+- `-H windowsgui` prevents a console window from opening alongside the GUI application.
+- `-s -w` strips symbol and debug information to reduce executable size.
+- `-o DiffFinder.exe` explicitly sets the output filename.
+
+> **Note:** Use `build.bat` or the equivalent command above to produce the intended release executable. A plain `go build` uses the default output name and does not apply the Windows GUI linker flag. Running `go build ./...` builds the packages but does not produce a single release executable for the application.
+
+### Application Icon
+
+The application icon is sourced from `icon.png`, embedded into the application using `go:embed`, and included in the Windows executable through `icon.ico` and `app_windows_amd64.syso`.
+
+If you change the icon, regenerate the Windows resource file using `rsrc` and rebuild the application.
+
+## 🖥️ Command-Line Usage
+
+Launch Diff Finder from the command line to compare files or directories.
+
+**Compare two files:**
+
 ```bat
 DiffFinder.exe <left-file> <right-file>
+```
+
+**Compare two directories:**
+
+```bat
 DiffFinder.exe --folder <left-dir> <right-dir>
 ```
 
-## Tests
+Replace the placeholders with the paths to the files or directories you want to compare.
+
+## 🧪 Testing
+
+Run the Go test suite from the project directory:
 
 ```bat
 go test ./...
 ```
 
-## Layout
+## 🏗️ Project Structure
 
+```text
+.
+├── main.go                         # Application startup, tabs, drag-and-drop, window geometry
+├── ui_file.go                      # File comparison interface and event handling
+├── ui_folder.go                    # Folder comparison interface and recursive results
+├── ui_file_test.go                 # Headless UI tests
+├── helpers.go                      # Path, size, time, and text formatting helpers
+├── winstate_windows.go              # Windows maximize-state detection using syscall
+├── winstate_other.go                # Non-Windows window-state fallback
+├── icon.png                         # Embedded application icon source
+├── icon.ico                         # Windows executable icon
+├── app_windows_amd64.syso           # Windows executable icon resources
+└── internal/
+    ├── diff/                        # Line-diff engine using Myers algorithm and sergi/go-diff
+    └── folder/                      # Recursive folder comparison and SHA-256 hashing
 ```
-main.go            app bootstrap, tabs, window drag & drop, geometry memory
-ui_file.go         file-compare panel
-ui_folder.go       folder-compare panel
-ui_file_test.go    headless UI tests (navigation, detail pane, summary colors)
-helpers.go         path/size/time/format helpers
-winstate_windows.go  Win32 maximize detection (stdlib syscall only)
-winstate_other.go    non-Windows stub
-icon.png           app icon (embedded + exe icon source)
-icon.ico / app_windows_amd64.syso  exe icon resources
-internal/diff      line-diff engine (Myers via sergi/go-diff) + tests
-internal/folder    recursive folder comparison + tests
-```
+
+## 🛠️ Built With
+
+- [Go](https://go.dev/) — Application logic and core functionality
+- [Fyne](https://fyne.io/) — Cross-platform GUI toolkit
+- [sergi/go-diff](https://github.com/sergi/go-diff) — Text difference engine
+
