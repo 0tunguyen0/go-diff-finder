@@ -1,0 +1,24 @@
+# Build output - rebuild with build.bat
+*.exe
+*.test
+*.out
+
+# Go cruft
+*.coverprofile
+coverage.html
+
+# Screenshots / local debug artifacts
+shot*.png
+*.log
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+
+# Temp
+tmp/
+temp/
