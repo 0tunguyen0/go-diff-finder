@@ -4,6 +4,8 @@
 
 With window-wide drag-and-drop support, side-by-side text comparison, and recursive directory analysis, Diff Finder makes it easy to identify, navigate, and report changes.
 
+![Diff Finder screenshot](screenshot.png)
+
 ## ✨ Features
 
 ### 📄 File Comparison
